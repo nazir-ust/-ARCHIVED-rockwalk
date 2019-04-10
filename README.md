@@ -22,7 +22,7 @@ This repository is a workspace that contains `MoveIt!`, `ur_modern_driver` and s
 5.  Then build the workspace. This will take 15-20 minutes. There may be a few warnings. Just ignore them.  
 `$  catkin build`
 
-6. Finally, source your new workspace everytime before use, or add it to your `.bashrc` script so that it is executed everytime you open the terminal.  
+6. Finally (assuming build has succeeded in the previous step), source your new workspace everytime before use, or add it to your `.bashrc` script so that it is executed everytime you open the terminal.  
 `$  source ~/ws_moveit/devel/setup.bash`
 
 ### 2.  Demo with MoveIt!
