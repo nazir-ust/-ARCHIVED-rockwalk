@@ -37,7 +37,7 @@ Note, this has nothing to do with Gazebo simulator. Just the naming has been thi
 2.  You can also run the following script to visualize a dual-arm zigzag motion. Turn-off loop-animation in RViz. Take a look at the script to see how the robot is being controlled using MoveIt.  
 `$  rosrun ur10_cm hong_kong_dual_arm_manipulation_operational.py`  
 
-3.  You can also practice writing your own code to come up with interesting robot motions like planning a circle, a spiral, etc. with one or both robot arms.
+3.  You can also practice writing your own code to come up with interesting robot motions like planning a circle, a spiral, an eight, etc. with one or both robot arms.
 
 ###  Concatenating gait and generating waypoints for the robot
 Here, we use the `MATLAB` scripts to generate a sequence of zigzag waypoints along
