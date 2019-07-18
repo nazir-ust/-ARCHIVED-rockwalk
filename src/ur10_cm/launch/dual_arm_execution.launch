@@ -20,7 +20,7 @@
     <arg name="max_payload_hong"  default="10.0"/>
 
     <!-- Arguments for robot kong-->
-    <arg name="ip_kong" default="143.89.192.3"/>
+    <arg name="ip_kong" default="192.168.1.10"/>
     <arg name="prefix_kong" default="kong_" />
     <arg name="min_payload_kong"  default="0.0"/>
     <arg name="max_payload_kong"  default="10.0"/>

@@ -59,6 +59,9 @@ class cone_manipuland:
 
 
     def subscribe_object_position(self):
+        # Comment this line if you are using april tag.
+        self._object_pose_from_tag = Pose(Point(0,0,0),Quaternion(0,0,0,1))
+
         rospy.loginfo("Subscribing to Object Position from April Tag")
         self._april_tag_sub = rospy.Subscriber("tag_detections_pose", PoseArray, self.store_object_april_tag_pose)
 
@@ -82,6 +85,8 @@ class cone_manipuland:
         #     self._object_pose_from_tag.position.z = 0.5*(pose_array.poses[0].position.z + pose_array.poses[1].position.z)
         #     return
 
+
+
         if len(pose_array.poses) > 0:
 
             if pose_array.poses[0]:
@@ -91,7 +96,6 @@ class cone_manipuland:
             # if pose_array.poses[1]:
             #     self._object_pose_from_tag = copy.deepcopy(pose_array.poses[1])
             #     return
-
 
 
 

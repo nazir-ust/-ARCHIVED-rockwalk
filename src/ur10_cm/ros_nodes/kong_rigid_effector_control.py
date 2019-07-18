@@ -281,13 +281,6 @@ class manipulation_control_law:
         self.follow_target_joint(joint_target)
 
 
-    # def init_quaternion(self):
-    #     self._init_quaternion = copy.deepcopy(self._quaternion)
-    #
-    #     self._tfms_init_quaternion = tfms.unit_vector([self._init_quaternion.quaternion.x/1000,
-    #                                           self._init_quaternion.quaternion.y/1000,
-    #                                           self._init_quaternion.quaternion.z/1000,
-    #                                           self._init_quaternion.quaternion.w/1000])
 
     def publish_end_effector_pose(self):
         eef_position = copy.deepcopy(self._group.get_current_pose().pose.position)
@@ -306,19 +299,10 @@ class manipulation_control_law:
 
         self._hong_active_joint_angle_pub.publish(msg)
 
-    def import_stream_pt_from_matlab(self):
-
-        """NOT IN USE"""
-
-        stream_points = sio.loadmat('/home/nazir/Documents/MATLAB/CDRM_Modeling/stream.mat')
-
-        self._stream_x = stream_points['stream_x']
-        self._stream_y = stream_points['stream_y']
-
 
     def import_left_right_rocking_matlab(self):
         # lr_rocking = sio.loadmat('/home/nazir/Documents/MATLAB/CDRM_Modeling/lr_rocking.mat')
-        lr_rocking = sio.loadmat('~/ws_moveit/src/ur10_cm/matlab_scripts/lr_rocking.mat')
+        lr_rocking = sio.loadmat('/home/nazir/ws_moveit/src/ur10_cm/matlab_scripts/lr_rocking.mat')
 
         self._right_rocking_target = lr_rocking['right_rock']
         self._left_rocking_target = lr_rocking['left_rock']
@@ -343,6 +327,8 @@ if __name__ == '__main__':
     print(manipulator_control.get_current_pose())
     manipulator_control.intialize_arm_pose()
     rospy.sleep(2)
+
+
 
     manipulator_control.import_left_right_rocking_matlab()
 
