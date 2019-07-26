@@ -35,8 +35,8 @@ class manipulation_control_law:
         self._scene = moveit_commander.PlanningSceneInterface()
         self._group = moveit_commander.MoveGroupCommander(group)
 
-        self._group.set_max_velocity_scaling_factor(0.8)
-        self._group.set_max_acceleration_scaling_factor(0.8)
+        self._group.set_max_velocity_scaling_factor(1)
+        self._group.set_max_acceleration_scaling_factor(1)
 
         self.initialize_subscribers()
         self.initialize_publishers()
@@ -58,15 +58,15 @@ class manipulation_control_law:
         self._object_masscenter_height = 0.30
         self._object_masscenter_lateraloffset = 0.15
 
-        self._apex_length = 1.30
+        self._apex_length = 1.36#1.30
 
     def intialize_arm_pose(self):
 
         self._kong_arm_init_pose = Pose()
 
-        self._kong_arm_init_pose.position.x =  -1.55
+        self._kong_arm_init_pose.position.x = -1.55#-1.60 #-1.55
         self._kong_arm_init_pose.position.y = -0.50
-        self._kong_arm_init_pose.position.z = 0.50
+        self._kong_arm_init_pose.position.z = 0.50#0.60 #0.50
 
         self._kong_arm_init_pose.orientation.x = -0.0260040764497
         self._kong_arm_init_pose.orientation.y = -0.701264425535
@@ -131,6 +131,7 @@ class manipulation_control_law:
         #Robot should take the first step instead of manually disturbing the object with hand:
         if rock_number == 0:
             rospy.loginfo("Initial rocking step to the right")
+            ropsy.sleep(1)
 
             start_pt = np.zeros((2,1))
             start_pt[0,0] = math.radians(self._euler.y) #tilt angle
@@ -210,7 +211,7 @@ class manipulation_control_law:
 
         self._group.execute(plan, wait=True)
 
-        rospy.sleep(1.3)
+        # rospy.sleep(1.3)
 
 #             self._group.stop()
 
@@ -241,7 +242,7 @@ class manipulation_control_law:
 
 
         steps = 3
-        step_length = 0.01
+        step_length = 0.005
 
         stream_x = np.zeros((1, int(math.ceil(steps/step_length))))
         stream_y = np.zeros((1, int(math.ceil(steps/step_length))))
@@ -393,7 +394,7 @@ if __name__ == '__main__':
         rate = rospy.Rate(50) #Rate previously 200. Change to smaller value
 
         dir_rock = -1 # begin with right rock
-        total_rocking_steps = 6
+        total_rocking_steps = 1
         rock_number = 0
 
         while not rospy.is_shutdown():

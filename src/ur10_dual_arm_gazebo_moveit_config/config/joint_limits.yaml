@@ -31,34 +31,34 @@ joint_limits:
     has_velocity_limits: true
     max_velocity: 1
     has_acceleration_limits: true
-    max_acceleration: 0.3
+    max_acceleration: 0.5
   kong_elbow_joint:
     has_velocity_limits: true
-    max_velocity: 1
+    max_velocity: 0.8
     has_acceleration_limits: true
     max_acceleration: 0.3
   kong_shoulder_lift_joint:
     has_velocity_limits: true
-    max_velocity: 1
+    max_velocity: 0.8
     has_acceleration_limits: true
     max_acceleration: 0.3
   kong_shoulder_pan_joint:
     has_velocity_limits: true
-    max_velocity: 1
+    max_velocity: 0.8
     has_acceleration_limits: true
     max_acceleration: 0.3
   kong_wrist_1_joint:
     has_velocity_limits: true
-    max_velocity: 1
+    max_velocity: 0.8
     has_acceleration_limits: true
     max_acceleration: 0.3
   kong_wrist_2_joint:
     has_velocity_limits: true
-    max_velocity: 1
+    max_velocity: 0.8
     has_acceleration_limits: true
     max_acceleration: 0.3
   kong_wrist_3_joint:
     has_velocity_limits: true
-    max_velocity: 1
+    max_velocity: 0.8
     has_acceleration_limits: true
     max_acceleration: 0.3
