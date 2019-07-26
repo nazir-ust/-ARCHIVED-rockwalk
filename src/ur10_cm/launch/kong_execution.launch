@@ -13,11 +13,6 @@
 
 <launch>
 
-    <!-- Arguments for robot hong -->
-    <arg name="ip_hong" default="143.89.192.15"/>
-    <arg name="prefix_hong" default="hong_" />
-    <arg name="min_payload_hong"  default="0.0"/>
-    <arg name="max_payload_hong"  default="10.0"/>
 
     <!-- Arguments for robot kong-->
     <arg name="ip_kong" default="192.168.1.10"/>
@@ -28,25 +23,9 @@
     <!-- Including File ...upload.launch: sets robot_description parameter -->
     <include file="$(find ur10_cm)/launch/dual_arm_hong_kong_gazebo_upload.launch"/>
 
-
-    <!-- Setting up namespace for hong_ur10 -->
-    <group ns="ns_hong">
-
-      <!--remap from="joint_states" to="/joint_states"/-->
-
-      <include file="$(find ur_modern_driver)/launch/ur_common.launch">
-        <arg name="robot_ip" value="$(arg ip_hong)"/>
-        <arg name="prefix" value="$(arg prefix_hong)"/>
-        <arg name="min_payload" value="$(arg min_payload_hong)"/>
-        <arg name="max_payload" value="$(arg max_payload_hong)"/>
-      </include>
-
-    </group>
-
-
     <!-- Setting up namespace for kong_ur10 -->
     <group ns="ns_kong">
-      <param name="ur_driver/reverse_port" type="int" value="5002"/>
+      <param name="ur_driver/reverse_port" type="int" value="5000"/>
       <!--remap from="joint_states" to="/joint_states"/-->
       <include file="$(find ur_modern_driver)/launch/ur_common.launch">
         <arg name="robot_ip" value="$(arg ip_kong)"/>

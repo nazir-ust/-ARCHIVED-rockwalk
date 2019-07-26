@@ -122,6 +122,9 @@ class EulerTransform:
 
 
 
+        #########################TWIST TRANSFORM###########################
+
+
         twist_vec = np.array([[self._twist.twist.angular.x],[self._twist.twist.angular.y],[self._twist.twist.angular.z]])
         rot_nonhomo = tfms.quaternion_matrix(imu_ginsberg_quat)
         rot_nonhomo = rot_nonhomo[0:3,0:3]

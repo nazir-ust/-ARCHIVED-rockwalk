@@ -42,6 +42,14 @@ class manipulation_control_law:
         self.initialize_publishers()
         self.initialize_tf_broadcasters_listeners()
 
+        self.set_object_parameters()
+
+    def set_object_parameters(self):
+        self._object_mass = 1
+        self._object_radius = 0.35
+        self._object_masscenter_height = 0.30
+        self._object_masscenter_lateraloffset = 0.15
+
     def intialize_arm_pose(self):
 
         self._kong_arm_init_pose = Pose()
@@ -185,6 +193,19 @@ class manipulation_control_law:
             count_left_rock += 1
 
         return rock_sign, count_right_rock, count_left_rock
+
+
+
+    def relocate_robot_arm_energy_feedback(self):
+        """
+        In this control scheme, take action such that potential energy can be reset.
+        """
+        # Compute current value of potential energy.
+        self._current_PE = self._object_radius*math.sin(math.radians(self._ginsberg_euler.y))
+            + self._object_masscenter_height*math.cos(math.radians(self._ginsberg_euler.y))
+            - self._object_masscenter_lateraloffset*math.cos(math.radians(self._ginsberg_euler.z))*math.sin(math.radians(self._ginsberg_euler.y))
+
+        print(self._current_PE)
 
 
     def relocate_robot_arm_threshold_control(self, rock_sign):
