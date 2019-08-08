@@ -54,9 +54,9 @@ class manipulation_control_law:
 
         self._kong_arm_init_pose = Pose()
 
-        self._kong_arm_init_pose.position.x =  -1.65
-        self._kong_arm_init_pose.position.y = -0.47
-        self._kong_arm_init_pose.position.z = 0.49
+        self._kong_arm_init_pose.position.x =  -1.5#-1.65
+        self._kong_arm_init_pose.position.y = -0.53#-0.47
+        self._kong_arm_init_pose.position.z = 0.42#0.49
 
         self._kong_arm_init_pose.orientation.x = -0.0260040764497
         self._kong_arm_init_pose.orientation.y = -0.701264425535
@@ -121,14 +121,14 @@ class manipulation_control_law:
 
     def subscribe_object_twist(self):
         rospy.loginfo("Subscribing to Twist Topic")
-        self._twist_sub =rospy.Subscriber("twist_motion_shield", TwistStamped, self.store_twist_data)
+        self._twist_sub =rospy.Subscriber("twist_ginsberg", TwistStamped, self.store_twist_data)
 
     def store_twist_data(self, twist_data):
         self._twist = copy.deepcopy(twist_data)
 
     def subscribe_body_euler(self):
         rospy.loginfo("Subscribing to Body Euler Topic")
-        self._body_euler_sub =rospy.Subscriber("body_euler", Vector3, self.store_body_euler)
+        self._body_euler_sub =rospy.Subscriber("euler_ginsberg", Vector3, self.store_body_euler)
 
     def store_body_euler(self, body_euler_data):
         self._body_euler = copy.deepcopy(body_euler_data)
@@ -177,14 +177,14 @@ class manipulation_control_law:
     def relocate_robot_arm_feedback_IK(self, rock_sign, count_right_rock, count_left_rock):
         """in this control scheme, take action when zero velocity event is detected"""
 
-        if self._twist.twist.angular.y < 23 and self._twist.twist.angular.y > 0 and self._body_euler.y < 0  and rock_sign == 1:
+        if self._twist.twist.angular.z > -23 and self._twist.twist.angular.z < -3 and self._body_euler.z < 0  and rock_sign == 1:
 
             print("right")
             self.relocate_arm_right(count_right_rock)
             rock_sign = -1*rock_sign
             count_right_rock += 1
 
-        if self._twist.twist.angular.y > -23 and self._twist.twist.angular.y < 0 and self._body_euler.y  > 0 and rock_sign == -1:
+        if self._twist.twist.angular.z < 23 and self._twist.twist.angular.z > 3 and self._body_euler.z  > 0 and rock_sign == -1:
             #try elif above
 
             print("left")
@@ -195,17 +195,6 @@ class manipulation_control_law:
         return rock_sign, count_right_rock, count_left_rock
 
 
-
-    def relocate_robot_arm_energy_feedback(self):
-        """
-        In this control scheme, take action such that potential energy can be reset.
-        """
-        # Compute current value of potential energy.
-        self._current_PE = self._object_radius*math.sin(math.radians(self._ginsberg_euler.y))
-            + self._object_masscenter_height*math.cos(math.radians(self._ginsberg_euler.y))
-            - self._object_masscenter_lateraloffset*math.cos(math.radians(self._ginsberg_euler.z))*math.sin(math.radians(self._ginsberg_euler.y))
-
-        print(self._current_PE)
 
 
     def relocate_robot_arm_threshold_control(self, rock_sign):
@@ -366,7 +355,7 @@ if __name__ == '__main__':
         rock_sign = -1; #-1 for left rock. 1 for right rock. To make sure only alternate rocks
         count_right_rock = 0
         count_left_rock = 0
-        rocking_steps = 20
+        rocking_steps = 5
         while not rospy.is_shutdown():
 
 

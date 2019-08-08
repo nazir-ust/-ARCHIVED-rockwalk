@@ -21,11 +21,8 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.interpolate import LinearNDInterpolator
 from scipy import signal
 import scipy
-from scipy import signal
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
-from scipy.interpolate import interp1d
 
 class manipulation_control_law:
 
@@ -37,6 +34,10 @@ class manipulation_control_law:
         self._robot = moveit_commander.RobotCommander("robot_description")
         self._scene = moveit_commander.PlanningSceneInterface()
         self._group = moveit_commander.MoveGroupCommander(group)
+
+
+        print(self._robot.get_group_names())
+        print(self._group.get_end_effector_link())
 
         self._group.set_max_velocity_scaling_factor(1)
         self._group.set_max_acceleration_scaling_factor(1)
@@ -51,21 +52,7 @@ class manipulation_control_law:
 
         print(self._group.get_current_pose().pose)
 
-        self._figure = plt.figure()
-        self._axis3d = self._figure.add_subplot(111, projection='3d')
-        # self._axis3d = self._figure.gca(projection='3d')
-        self._axis3d.set_aspect('equal')
-        self._axis3d.set_xlabel('X')
-        self._axis3d.set_ylabel('Y')
-        self._axis3d.set_zlabel('Z')
-
-        self._axis3d.axes.set_xlim3d(-1,-2)
-        self._axis3d.axes.set_ylim3d(0,-1)
-        self._axis3d.axes.set_zlim3d(0,1)
-        # plt.show()
         rospy.sleep(1)
-
-
 
     #add table to scene:
 
@@ -92,37 +79,25 @@ class manipulation_control_law:
             self._object_radius = 0.155
 
             self._object_apex_lateral_offset = 0.110
-            self._object_apex_vertical_offset = 1.135
+            self._object_apex_vertical_offset = 1.10
 
             self._object_masscenter_lateraloffset = 0.10
             self._object_masscenter_height = 0.50
-
-        elif object_id == 2:
-            rospy.loginfo("Kahei's Carbon Fiber Object for Treadmill")
-            self._object_mass = 1
-
-            self._object_radius = 0.155
-
-            self._object_apex_lateral_offset = 0.110
-            self._object_apex_vertical_offset = 1.135
-
-            self._object_masscenter_lateraloffset = 0.10
-            self._object_masscenter_height = 0.50
-
 
 
     def intialize_arm_pose(self):
 
         self._kong_arm_init_pose = Pose()
 
-        self._kong_arm_init_pose.position.x = -1.45#-1.50
-        self._kong_arm_init_pose.position.y = -0.53
-        self._kong_arm_init_pose.position.z = 0.43
+        self._kong_arm_init_pose.position.x = -0.80
+        self._kong_arm_init_pose.position.y = 0.30
+        self._kong_arm_init_pose.position.z = 0.45
 
-        self._kong_arm_init_pose.orientation.x = 0.0615893901435#-0.0260040764497
-        self._kong_arm_init_pose.orientation.y = 0.67567700164#-0.701264425535
-        self._kong_arm_init_pose.orientation.z = -0.73442300832#0.712262067535
-        self._kong_arm_init_pose.orientation.w = 0.0170347094574#0.0153212479218
+        self._kong_arm_init_pose.orientation.x = -0.0260040764497
+        self._kong_arm_init_pose.orientation.y = -0.701264425535
+        self._kong_arm_init_pose.orientation.z = 0.712262067535
+        self._kong_arm_init_pose.orientation.w = 0.0153212479218
+
 
 
         self.follow_target_pose(self._kong_arm_init_pose)
@@ -135,7 +110,7 @@ class manipulation_control_law:
         rospy.loginfo("Following Target Pose with End Effector Now")
 
         try:
-            self._group.set_pose_target(data, "kong_ee_link")
+            self._group.set_pose_target(data, "ee_link")
             plan = self._group.plan()
             self._group.execute(plan, wait=True)
             self._group.clear_pose_targets()
@@ -175,18 +150,14 @@ class manipulation_control_law:
 
         theta_desired = math.radians(20)
 
-        phi_desired = math.radians(25)
+        phi_desired = math.radians(15)
 
         if rock_number == 0:
 
             #--------------------------------------------------
-            # rospy.loginfo("Recording Initial Eulers")
-            # self._initial_psi = self._euler.x
-            # self._initial_theta = self._euler.y
-            # self._initial_phi = self._euler.z
-            # print("Initial psi is: ", self._initial_psi)
-            # print("Initial theta is: ", self._initial_theta)
-            # print("Initial phi is: ", self._initial_phi)
+            # rospy.loginfo("Recording Initial Heading")
+            # self._initial_heading = self._euler.x
+            # print("Initial heading is: ", self._initial_heading)
             #--------------------------------------------------
 
             rospy.loginfo("Initial rocking step to the right")
@@ -274,21 +245,19 @@ class manipulation_control_law:
             wpose.position.y = current_pose.position.y + col[1]
             wpose.position.z = current_pose.position.z + col[2]
 
-            # self._axis3d.scatter(wpose.position.x,wpose.position.y,wpose.position.z)
-
             waypoints.append(wpose)
 
 
-
         (plan, fraction) = self._group.compute_cartesian_path(waypoints,0.01,0.0)
+
 
         rospy.loginfo("Following Target Waypoints")
 
         self._group.execute(plan, wait=True)
 
-        rospy.sleep(0.70)
-#         self._group.stop()
-#         self._group.clear_pose_targets()
+        rospy.sleep(1.3)
+        self._group.stop()
+        self._group.clear_pose_targets()
 
 
     def load_control_vectorfield(self):
@@ -335,7 +304,7 @@ class manipulation_control_law:
 
 
         steps = 3
-        step_length = 0.005
+        step_length = 0.02
 
         stream_x = np.zeros((1, int(math.ceil(steps/step_length))))
         stream_y = np.zeros((1, int(math.ceil(steps/step_length))))
@@ -372,7 +341,7 @@ class manipulation_control_law:
             current_stream_pt = next_stream_pt;
             current_direction = next_direction;
 
-            if np.linalg.norm(current_direction) < 0.1:
+            if np.linalg.norm(current_direction) < 0.5:
                 break
 
         self._stream_theta0 = stream_x[0, 0:stp];
@@ -424,14 +393,11 @@ class manipulation_control_law:
         #rot_psi_diff = tfms.rotation_matrix(math.radians(self._euler.x), [0,0,1])
         #position_apex_rotated = np.matmul(rot_psi_diff,position_apex)
 
-
         return position_apex #position_apex_rotated #position_apex
 
     def compute_apex_position_sequence(self, dir_rock):
 
         R = self._object_radius
-
-        phi_offset = math.radians(0)
 
         apex_position_sequence = np.zeros((4,1))
 
@@ -440,7 +406,6 @@ class manipulation_control_law:
 
 
             current_rot_psi = tfms.rotation_matrix(math.radians(self._euler.x), [0,0,1])
-            # current_rot_psi = tfms.rotation_matrix(math.radians(-90), [0,0,1])
 
             init_rot = tfms.rotation_matrix(math.pi/2, [0,0,1])
             rot_StoQ = np.matmul(np.matmul(np.matmul(current_rot_psi,init_rot),tfms.rotation_matrix(theta0, [0,1,0])),tfms.rotation_matrix(dir_rock*alpha, [1,0,0]))
@@ -462,7 +427,7 @@ class manipulation_control_law:
             apex_position_sequence = np.concatenate((apex_position_sequence, apex_position), axis=1)
 
 
-        apex_position_sequence = apex_position_sequence[:, 1:]
+        apex_position_sequence = apex_position_sequence[:, 2:]
         self._diff_apex_position_sequence = apex_position_sequence - apex_position_sequence[:,0].reshape(4,1)
 
 
@@ -484,7 +449,7 @@ class manipulation_control_law:
 if __name__ == '__main__':
     rospy.init_node("kong_pe_control", anonymous=True)
 
-    manipulator_control = manipulation_control_law("kong_arm")
+    manipulator_control = manipulation_control_law("manipulator")
     manipulator_control.intialize_arm_pose()
 
     rospy.loginfo("Initialized Arm Pose")
@@ -516,5 +481,5 @@ if __name__ == '__main__':
 
             rate.sleep()
 
-        # plt.show()
+        #plt.show()
     rospy.spin()
