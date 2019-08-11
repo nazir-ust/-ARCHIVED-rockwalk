@@ -39,7 +39,7 @@ class manipulation_control_law:
         self._group = moveit_commander.MoveGroupCommander(group)
 
         self._group.set_max_velocity_scaling_factor(1)
-        self._group.set_max_acceleration_scaling_factor(1)
+        self._group.set_max_acceleration_scaling_factor(0.3)
 
         self.initialize_subscribers()
         self.initialize_publishers()
@@ -51,18 +51,18 @@ class manipulation_control_law:
 
         print(self._group.get_current_pose().pose)
 
-        self._figure = plt.figure()
-        self._axis3d = self._figure.add_subplot(111, projection='3d')
-        # self._axis3d = self._figure.gca(projection='3d')
-        self._axis3d.set_aspect('equal')
-        self._axis3d.set_xlabel('X')
-        self._axis3d.set_ylabel('Y')
-        self._axis3d.set_zlabel('Z')
-
-        self._axis3d.axes.set_xlim3d(-1,-2)
-        self._axis3d.axes.set_ylim3d(0,-1)
-        self._axis3d.axes.set_zlim3d(0,1)
-        # plt.show()
+        # self._figure = plt.figure()
+        # self._axis3d = self._figure.add_subplot(111, projection='3d')
+        # # self._axis3d = self._figure.gca(projection='3d')
+        # self._axis3d.set_aspect('equal')
+        # self._axis3d.set_xlabel('X')
+        # self._axis3d.set_ylabel('Y')
+        # self._axis3d.set_zlabel('Z')
+        #
+        # self._axis3d.axes.set_xlim3d(-1,-2)
+        # self._axis3d.axes.set_ylim3d(0,-1)
+        # self._axis3d.axes.set_zlim3d(0,1)
+        # # plt.show()
         rospy.sleep(1)
 
 
@@ -77,37 +77,26 @@ class manipulation_control_law:
 
             self._object_radius = 0.35
 
-            self._object_apex_lateral_offset = 0.42
-            self._object_apex_vertical_offset = 1.30
+            self._object_apex_lateral_offset = 0.35
+            self._object_apex_vertical_offset = 1.20
 
             self._object_masscenter_lateraloffset = 0.15
             self._object_masscenter_height = 0.30
 
-            self._apex_length = 1.30#1.30
+            # self._apex_length = 1.20#1.30
+
 
         elif object_id == 1:
-            rospy.loginfo("Small Cone Object for Treadmill")
-            self._object_mass = 1
-
-            self._object_radius = 0.155
-
-            self._object_apex_lateral_offset = 0.110
-            self._object_apex_vertical_offset = 1.135
-
-            self._object_masscenter_lateraloffset = 0.10
-            self._object_masscenter_height = 0.50
-
-        elif object_id == 2:
             rospy.loginfo("Kahei's Carbon Fiber Object for Treadmill")
-            self._object_mass = 1
+            self._object_mass = 0.30
 
-            self._object_radius = 0.155
+            self._object_radius = 0.1420
 
-            self._object_apex_lateral_offset = 0.110
-            self._object_apex_vertical_offset = 1.135
+            self._object_apex_lateral_offset = 0.1440
+            self._object_apex_vertical_offset = 1.20
 
-            self._object_masscenter_lateraloffset = 0.10
-            self._object_masscenter_height = 0.50
+            self._object_masscenter_lateraloffset = 0.130
+            self._object_masscenter_height = 0.450
 
 
 
@@ -115,14 +104,14 @@ class manipulation_control_law:
 
         self._kong_arm_init_pose = Pose()
 
-        self._kong_arm_init_pose.position.x = -1.45#-1.50
-        self._kong_arm_init_pose.position.y = -0.53
-        self._kong_arm_init_pose.position.z = 0.43
+        self._kong_arm_init_pose.position.x = -1.450 #-1.50
+        self._kong_arm_init_pose.position.y = -0.58
+        self._kong_arm_init_pose.position.z = 0.51
 
-        self._kong_arm_init_pose.orientation.x = 0.0615893901435#-0.0260040764497
-        self._kong_arm_init_pose.orientation.y = 0.67567700164#-0.701264425535
-        self._kong_arm_init_pose.orientation.z = -0.73442300832#0.712262067535
-        self._kong_arm_init_pose.orientation.w = 0.0170347094574#0.0153212479218
+        self._kong_arm_init_pose.orientation.x = -0.0260040764497
+        self._kong_arm_init_pose.orientation.y = -0.701264425535
+        self._kong_arm_init_pose.orientation.z = 0.712262067535
+        self._kong_arm_init_pose.orientation.w = 0.0153212479218
 
 
         self.follow_target_pose(self._kong_arm_init_pose)
@@ -146,6 +135,7 @@ class manipulation_control_law:
         rospy.loginfo("Initializing Subscribers")
         self._euler_sub =rospy.Subscriber("euler_ginsberg", Vector3, self.store_euler_data)
         self._twist_sub =rospy.Subscriber("twist_ginsberg", TwistStamped, self.store_twist_data)
+        self._contact_position =rospy.Subscriber("contact_position_ginsberg", Vector3, self.store_contact_data)
 
 
     def initialize_publishers(self):
@@ -153,9 +143,8 @@ class manipulation_control_law:
         self._hong_active_joint_angle_pub = rospy.Publisher('hong_active_joint_angles', Vector3, queue_size=10)
         self._kong_eef_position_pub = rospy.Publisher('kong_eef_position', Point, queue_size=10)
 
-
         self._object_pe_pub = rospy.Publisher('object_potential_energy', Float64, queue_size=10)
-        self._euler_error_pub = rospy.Publisher('euler_ginsberg_euler', Vector3, queue_size=10)
+        # self._euler_error_pub = rospy.Publisher('euler_ginsberg_euler', Vector3, queue_size=10)
 
 
     def initialize_tf_broadcasters_listeners(self):
@@ -168,14 +157,16 @@ class manipulation_control_law:
     def store_euler_data(self, euler_data):
         self._euler = copy.deepcopy(euler_data) #in degrees
 
+    def store_contact_data(self, contact_data):
+        self._contact_position = copy.deepcopy(contact_data) #in degrees
 
     def rock_walk(self, dir_rock, rock_number):
 
         #Robot should take the first step instead of manually disturbing the object with hand:
 
-        theta_desired = math.radians(20)
+        theta_desired = math.radians(18)
 
-        phi_desired = math.radians(25)
+        phi_desired = math.radians(30)
 
         if rock_number == 0:
 
@@ -200,15 +191,16 @@ class manipulation_control_law:
 
             self.flow_of_vector_field(start_pt)
             self.compute_apex_position_sequence(dir_rock)
-            self.relocate_arm_waypoints()
 
-            dir_rock = -1*dir_rock
-            rock_number += 1
+            [dir_rock, rock_number] = self.relocate_arm_waypoints(dir_rock, rock_number)
+            #
+            # dir_rock = -1*dir_rock
+            # rock_number += 1
 
             return dir_rock, rock_number
 
 
-        # if self._euler.z<10 and self._twist.twist.angular.z < -3 and self._euler.y > 10 and dir_rock == -1:
+        # if self._euler.z < 10 and self._twist.twist.angular.z < -3 and self._euler.y > 10 and dir_rock == -1:
 
         if self._euler.y > 10 and dir_rock == -1:
 
@@ -224,10 +216,11 @@ class manipulation_control_law:
 
             self.flow_of_vector_field(start_pt)
             self.compute_apex_position_sequence(dir_rock)
-            self.relocate_arm_waypoints()
 
-            dir_rock = -1*dir_rock
-            rock_number += 1
+            [dir_rock, rock_number] = self.relocate_arm_waypoints(dir_rock, rock_number)
+
+            # dir_rock = -1*dir_rock
+            # rock_number += 1
 
             # plt.plot(self._stream_theta0.T, self._stream_alpha.T)
             # plt.hold
@@ -250,17 +243,18 @@ class manipulation_control_law:
 
             self.flow_of_vector_field(start_pt)
             self.compute_apex_position_sequence(dir_rock)
-            self.relocate_arm_waypoints()
 
-            dir_rock = -1*dir_rock
-            rock_number += 1
+            [dir_rock, rock_number] = self.relocate_arm_waypoints(dir_rock, rock_number)
+
+            # dir_rock = -1*dir_rock
+            # rock_number += 1
 
             # plt.plot(self._stream_theta0.T, self._stream_alpha.T)
             # plt.hold
 
         return dir_rock, rock_number
 
-    def relocate_arm_waypoints(self):
+    def relocate_arm_waypoints(self, dir_rock, rock_number):
 
         waypoints = []
 
@@ -272,7 +266,7 @@ class manipulation_control_law:
             wpose.orientation = copy.deepcopy(current_pose.orientation)
             wpose.position.x = current_pose.position.x + col[0]
             wpose.position.y = current_pose.position.y + col[1]
-            wpose.position.z = current_pose.position.z + col[2]
+            wpose.position.z = self._kong_arm_init_pose.position.z + col[2]
 
             # self._axis3d.scatter(wpose.position.x,wpose.position.y,wpose.position.z)
 
@@ -282,14 +276,19 @@ class manipulation_control_law:
 
         (plan, fraction) = self._group.compute_cartesian_path(waypoints,0.01,0.0)
 
-        rospy.loginfo("Following Target Waypoints")
+        if fraction > 0.80:
 
-        self._group.execute(plan, wait=True)
+            rospy.loginfo("Following Target Waypoints")
+            self._group.execute(plan, wait=True)
+            rospy.sleep(0.10)
 
-        rospy.sleep(0.70)
-#         self._group.stop()
-#         self._group.clear_pose_targets()
+            dir_rock = -1*dir_rock
+            rock_number += 1
 
+            return dir_rock, rock_number
+
+        else:
+            return dir_rock, rock_number
 
     def load_control_vectorfield(self):
 
@@ -372,7 +371,7 @@ class manipulation_control_law:
             current_stream_pt = next_stream_pt;
             current_direction = next_direction;
 
-            if np.linalg.norm(current_direction) < 0.1:
+            if np.linalg.norm(current_direction) < 0.3:
                 break
 
         self._stream_theta0 = stream_x[0, 0:stp];
@@ -479,6 +478,14 @@ class manipulation_control_law:
 
 
 
+    def compute_distance_traversed(self, initial_contact_position):
+        rospy.loginfo("Final contact position")
+        print(self._contact_position)
+        x_displacement = self._contact_position.x - initial_contact_position.x
+        y_displacement = self._contact_position.y - initial_contact_position.y
+
+        return x_displacement, y_displacement
+
 
 
 if __name__ == '__main__':
@@ -489,6 +496,11 @@ if __name__ == '__main__':
 
     rospy.loginfo("Initialized Arm Pose")
     rospy.sleep(1)
+
+    rospy.loginfo("Record initial contact coordinates")
+    initial_contact_position = (manipulator_control._contact_position)
+    print(initial_contact_position)
+
 
     nb_key = raw_input('Press 1 to begin rock-walk')
 
@@ -502,7 +514,7 @@ if __name__ == '__main__':
         rate = rospy.Rate(50) #Rate previously 200. Change to smaller value
 
         dir_rock = -1 # begin with right rock
-        total_rocking_steps = 3
+        total_rocking_steps = 0
         rock_number = 0
 
         while not rospy.is_shutdown():
@@ -516,5 +528,11 @@ if __name__ == '__main__':
 
             rate.sleep()
 
+        [x_displacement, y_displacement] = manipulator_control.compute_distance_traversed(initial_contact_position)
+
+        rospy.loginfo("net distance traversed along x and y directions")
+        print(x_displacement)
+        print(y_displacement)
+        print(rock_number)
         # plt.show()
     rospy.spin()

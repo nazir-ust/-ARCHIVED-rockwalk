@@ -15,7 +15,7 @@ from geometry_msgs.msg import Pose, Point, Quaternion, Vector3
 from geometry_msgs.msg import PoseStamped, QuaternionStamped, TwistStamped, AccelStamped, Vector3Stamped
 from geometry_msgs.msg import PoseArray
 from visualization_msgs.msg import Marker
-from std_msgs.msg import Header, ColorRGBA
+from std_msgs.msg import Header, ColorRGBA, Float64
 from tf import transformations as tfms
 import tf_conversions as tfc
 import numpy as np
@@ -44,17 +44,10 @@ class EulerTransform:
     def set_object_parameters(self, object_id):
 
         if object_id == 0:
-            # self._object_mass = 1
             self._object_radius = 0.35
-            # self._object_masscenter_height = 0.30
-            # self._object_masscenter_lateraloffset = 0.15
-
-            # self._apex_length = 1.40#1.30
 
         elif object_id == 1:
-            self._object_radius = 0.155
-
-
+            self._object_radius = 0.1420
 
 
     def initialize_past_velocity_containers(self):
@@ -68,6 +61,8 @@ class EulerTransform:
         self._ginsberg_euler_pub = rospy.Publisher('euler_ginsberg', Vector3, queue_size=10)
         self._ginsberg_twist_pub = rospy.Publisher('twist_ginsberg', TwistStamped, queue_size=10)
         self._ginsberg_position_pub = rospy.Publisher('position_ginsberg', Vector3, queue_size=10)
+        self._ginsberg_contact_position_pub = rospy.Publisher('contact_position_ginsberg', Vector3, queue_size=10)
+        self._rocking_amplitude_pub = rospy.Publisher('rocking_amplitude', Float64, queue_size=10)
 
         # self._marker_pub = rospy.Publisher('manipuland_marker_topic', Marker, queue_size=10)
 
@@ -246,7 +241,27 @@ class EulerTransform:
         contact_position_x = disk_center_position.x + ground_contact_vector[0]
         contact_position_y = disk_center_position.y + ground_contact_vector[1]
 
+        contact_position = Vector3()
+        contact_position.x = contact_position_x
+        contact_position.y = contact_position_y
+        contact_position.z = 0
+
+        self._ginsberg_contact_position_pub.publish(contact_position)
+
         # plt.scatter(contact_position_x, contact_position_y)
+
+
+
+    def compute_rocking_amplitude(self, current_rocking_amplitude):
+        rocking_amplitude = Float64()
+        if np.absolute(self._angular_velocity_ginsberg.z) < 8 and self._ginsberg_euler.y > 10:
+            current_rocking_amplitude = np.absolute(self._ginsberg_euler.z)
+            self._rocking_amplitude_pub.publish(current_rocking_amplitude)
+            return current_rocking_amplitude
+
+        else:
+            self._rocking_amplitude_pub.publish(current_rocking_amplitude)
+            return current_rocking_amplitude
 
 
 
@@ -286,12 +301,15 @@ if __name__ == '__main__':
     current_position = Vector3(0,0,0)
     current_time = rospy.get_time()
 
+    current_rocking_amplitude = Float64(0)
+
     while not rospy.is_shutdown():
 
         euler_transform.transform_to_ginsberg_euler_twist()
         [current_position, current_time] = euler_transform.nonholonomic_translational_distance(current_position, current_time)
         # euler_transform.publish_manipuland_marker()
         # euler_transform.compute_contact_coordinates()
+        current_rocking_amplitude = euler_transform.compute_rocking_amplitude(current_rocking_amplitude)
         rate.sleep()
 
     # plt.show()

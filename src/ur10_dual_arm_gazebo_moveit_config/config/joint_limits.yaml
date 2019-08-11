@@ -3,62 +3,62 @@
 # Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]
 joint_limits:
   hong_elbow_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 1
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.5
   hong_shoulder_lift_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 1
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.5
   hong_shoulder_pan_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 1
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.5
   hong_wrist_1_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 1
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.5
   hong_wrist_2_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 1
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.5
   hong_wrist_3_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 1
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.5
   kong_elbow_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 0.8
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.3
   kong_shoulder_lift_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 0.8
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.3
   kong_shoulder_pan_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 0.8
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.3
   kong_wrist_1_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 0.8
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.3
   kong_wrist_2_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 0.8
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.3
   kong_wrist_3_joint:
-    has_velocity_limits: true
+    has_velocity_limits: false
     max_velocity: 0.8
-    has_acceleration_limits: true
+    has_acceleration_limits: false
     max_acceleration: 0.3

@@ -54,9 +54,9 @@ class manipulation_control_law:
 
         self._kong_arm_init_pose = Pose()
 
-        self._kong_arm_init_pose.position.x =  -1.5#-1.65
+        self._kong_arm_init_pose.position.x =  -1.45#-1.65
         self._kong_arm_init_pose.position.y = -0.53#-0.47
-        self._kong_arm_init_pose.position.z = 0.42#0.49
+        self._kong_arm_init_pose.position.z = 0.49#0.49
 
         self._kong_arm_init_pose.orientation.x = -0.0260040764497
         self._kong_arm_init_pose.orientation.y = -0.701264425535
@@ -102,7 +102,7 @@ class manipulation_control_law:
             Uncomment this command after carefully visualizing the motion in RViz.
             """
 
-            # self._group.execute(plan)
+            self._group.execute(plan)
 
             self._group.clear_pose_targets()
 
@@ -355,7 +355,7 @@ if __name__ == '__main__':
         rock_sign = -1; #-1 for left rock. 1 for right rock. To make sure only alternate rocks
         count_right_rock = 0
         count_left_rock = 0
-        rocking_steps = 5
+        rocking_steps = 20
         while not rospy.is_shutdown():
 
 
