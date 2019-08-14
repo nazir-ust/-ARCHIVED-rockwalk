@@ -29,7 +29,7 @@ from cone_pose_visualization import cone_manipuland
 
 font = {'family' : 'normal',
         'weight' : 'normal',
-        'size'   : 16}
+        'size'   : 20}
 
 matplotlib.rc('font', **font)
 
@@ -142,7 +142,7 @@ class rock_walk_plot:
         points_euler_plot_theta = axis_euler_plot.plot(0, 0, 'g-', label='Theta (deg)')[0]
         points_euler_plot_phi = axis_euler_plot.plot(0, 0, 'm-', label='Phi (deg)')[0]
 
-        # axis_euler_plot.legend()
+        axis_euler_plot.legend()
         plt.pause(1e-17)
 
         return figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi
@@ -190,7 +190,9 @@ if __name__ == '__main__':
         rw_plot.append_data_values()
 
         rw_plot.contact_position_plot(fig_contact_plot, axis_contact_plot, background_contact_plot, points_contact_plot)
+
         # rw_plot.euler_plot(figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi)
+
         rate.sleep()
 
     rospy.spin()

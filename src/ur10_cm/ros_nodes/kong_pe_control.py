@@ -39,7 +39,7 @@ class manipulation_control_law:
         self._group = moveit_commander.MoveGroupCommander(group)
 
         self._group.set_max_velocity_scaling_factor(1)
-        self._group.set_max_acceleration_scaling_factor(0.3)
+        self._group.set_max_acceleration_scaling_factor(1)
 
         self.initialize_subscribers()
         self.initialize_publishers()
@@ -104,9 +104,9 @@ class manipulation_control_law:
 
         self._kong_arm_init_pose = Pose()
 
-        self._kong_arm_init_pose.position.x = -1.450 #-1.50
+        self._kong_arm_init_pose.position.x = -1.50#-1.450
         self._kong_arm_init_pose.position.y = -0.58
-        self._kong_arm_init_pose.position.z = 0.51
+        self._kong_arm_init_pose.position.z = 0.52#0.51
 
         self._kong_arm_init_pose.orientation.x = -0.0260040764497
         self._kong_arm_init_pose.orientation.y = -0.701264425535
@@ -274,7 +274,7 @@ class manipulation_control_law:
 
 
 
-        (plan, fraction) = self._group.compute_cartesian_path(waypoints,0.01,0.0)
+        (plan, fraction) = self._group.compute_cartesian_path(waypoints,0.005,0.0)
 
         if fraction > 0.80:
 
@@ -299,6 +299,7 @@ class manipulation_control_law:
         # u_field = e_control['U']
         # v_field = e_control['V']
 
+        self._psi_fun = e_control['PSI_FUN'] #NOT BEING USED
         self._theta_fun = e_control['THETA_FUN']
         self._phi_fun = e_control['PHI_FUN']
 
@@ -334,7 +335,7 @@ class manipulation_control_law:
 
 
         steps = 3
-        step_length = 0.005
+        step_length = 0.002
 
         stream_x = np.zeros((1, int(math.ceil(steps/step_length))))
         stream_y = np.zeros((1, int(math.ceil(steps/step_length))))
@@ -381,6 +382,9 @@ class manipulation_control_law:
 
     def euler_from_matrix(self,rot):
 
+        """Return ZYZ euler angles according to Ginsberg i.e.
+           rot = rot_z(psi)*rot_z(pi/2)*rot_y(theta)*rot_z(phi)"""
+
         if rot[2,2]!= 1 or rot[2,2]!= 1:
             theta = math.atan2(math.sqrt(math.pow(rot[0,2],2) + math.pow(rot[1,2],2)),rot[2,2])
             phi = math.atan2(rot[2,1],-rot[2,0])
@@ -397,6 +401,7 @@ class manipulation_control_law:
             psi = math.atan2(-rot[0,0],rot[1,0])
 
         return psi, theta, phi
+
 
     def compute_apex_position(self, rot_StoQ, rot_StoB, G_pos):
 
@@ -479,8 +484,8 @@ class manipulation_control_law:
 
 
     def compute_distance_traversed(self, initial_contact_position):
-        rospy.loginfo("Final contact position")
-        print(self._contact_position)
+        # rospy.loginfo("Final contact position")
+        # print(self._contact_position)
         x_displacement = self._contact_position.x - initial_contact_position.x
         y_displacement = self._contact_position.y - initial_contact_position.y
 
@@ -519,11 +524,22 @@ if __name__ == '__main__':
 
         while not rospy.is_shutdown():
 
-            manipulator_control.compute_potential_energy()
+            # manipulator_control.compute_potential_energy()
+            # [x_displacement, y_displacement] = manipulator_control.compute_distance_traversed(initial_contact_position)
+            #
+            # if y_displacement > 0.02:
+            #     "Rock left to maintain heading"
+            #     dir_rock = 1
+            #
+            # elif y_displacement < -0.02:
+            #     "Rock right to maintain heading"
+            #     dir_rock = -1
 
             if rock_number<= total_rocking_steps:
 
                 [dir_rock, rock_number] = manipulator_control.rock_walk(dir_rock, rock_number)
+
+                print(rock_number)
 
 
             rate.sleep()
