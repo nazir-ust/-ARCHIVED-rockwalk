@@ -148,6 +148,27 @@ class rock_walk_plot:
         return figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi
 
 
+    def setup_phase_plot(self):
+        fig_phase_plot, axis_phase_plot = plt.subplots(1, 1)
+        # axis_contact_plot.set_aspect('equal')
+        axis_phase_plot.set_xlim(-180, 180)
+        axis_phase_plot.set_ylim(-270, 270)
+        axis_phase_plot.hold(True)
+
+        plt.show(False)
+        plt.draw()
+        plt.xlabel("phi (deg)")
+        plt.ylabel("phi_dot (deg)")
+        plt.title("Phase Plot")
+
+        background_phase_plot = fig_phase_plot.canvas.copy_from_bbox(axis_phase_plot.bbox)
+
+        points_phase_plot = axis_phase_plot.plot(0, 0, 'b-')[0]
+
+        plt.pause(1e-17)
+
+        return fig_phase_plot, axis_phase_plot, background_phase_plot, points_phase_plot
+
 
     def contact_position_plot(self, figure, axis, background, points):
 
@@ -171,6 +192,14 @@ class rock_walk_plot:
 
         plt.pause(1e-50)
 
+
+    def phase_plot(self, figure, axis, background, points):
+        points.set_data(self._euler_ginsberg_values_z,self._twist_ginsberg_values_z)
+        figure.canvas.restore_region(background)
+        axis.draw_artist(points)
+        figure.canvas.blit(axis.bbox)
+        plt.pause(1e-50)
+
 if __name__ == '__main__':
     rospy.init_node("rock_walk_plots", anonymous=True)
 
@@ -180,6 +209,8 @@ if __name__ == '__main__':
     [fig_contact_plot, axis_contact_plot, background_contact_plot, points_contact_plot] = rw_plot.setup_contact_position_plot()
 
     # [figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi] = rw_plot.setup_euler_plot()
+
+    [fig_phase_plot, axis_phase_plot, background_phase_plot, points_phase_plot] = rw_plot.setup_phase_plot()
 
     rate = rospy.Rate(50) #previously 55
 
@@ -192,6 +223,8 @@ if __name__ == '__main__':
         rw_plot.contact_position_plot(fig_contact_plot, axis_contact_plot, background_contact_plot, points_contact_plot)
 
         # rw_plot.euler_plot(figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi)
+
+        rw_plot.phase_plot(fig_phase_plot, axis_phase_plot, background_phase_plot, points_phase_plot)
 
         rate.sleep()
 

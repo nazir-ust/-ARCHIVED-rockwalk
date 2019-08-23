@@ -45,7 +45,7 @@ class manipulation_control_law:
         self.initialize_publishers()
         self.initialize_tf_broadcasters_listeners()
 
-        self.set_object_parameters(object_id = 1)
+        self.set_object_parameters(object_id = 0)
         self.load_control_vectorfield()
 
 
@@ -72,13 +72,13 @@ class manipulation_control_law:
     def set_object_parameters(self, object_id):
 
         if object_id == 0:
-            rospy.loginfo("Big Cone Object not for Treadmill")
+            rospy.loginfo("Old Metal Cone")
             self._object_mass = 1
 
             self._object_radius = 0.35
 
             self._object_apex_lateral_offset = 0.35
-            self._object_apex_vertical_offset = 1.20
+            self._object_apex_vertical_offset = 1.30
 
             self._object_masscenter_lateraloffset = 0.15
             self._object_masscenter_height = 0.30
@@ -106,7 +106,7 @@ class manipulation_control_law:
 
         self._kong_arm_init_pose.position.x = -1.50#-1.450
         self._kong_arm_init_pose.position.y = -0.58
-        self._kong_arm_init_pose.position.z = 0.52#0.51
+        self._kong_arm_init_pose.position.z = 0.51#0.53#0.51
 
         self._kong_arm_init_pose.orientation.x = -0.0260040764497
         self._kong_arm_init_pose.orientation.y = -0.701264425535
@@ -157,28 +157,24 @@ class manipulation_control_law:
     def store_euler_data(self, euler_data):
         self._euler = copy.deepcopy(euler_data) #in degrees
 
+        if np.absolute(self._euler.z) < 0.5:
+            self._equilibrium_euler = copy.deepcopy(self._euler)
+            # print (self._equilibrium_euler)
+
     def store_contact_data(self, contact_data):
         self._contact_position = copy.deepcopy(contact_data) #in degrees
+
 
     def rock_walk(self, dir_rock, rock_number):
 
         #Robot should take the first step instead of manually disturbing the object with hand:
 
-        theta_desired = math.radians(18)
-
-        phi_desired = math.radians(30)
+        print(self._equilibrium_euler)
 
         if rock_number == 0:
-
-            #--------------------------------------------------
-            # rospy.loginfo("Recording Initial Eulers")
-            # self._initial_psi = self._euler.x
-            # self._initial_theta = self._euler.y
-            # self._initial_phi = self._euler.z
-            # print("Initial psi is: ", self._initial_psi)
-            # print("Initial theta is: ", self._initial_theta)
-            # print("Initial phi is: ", self._initial_phi)
-            #--------------------------------------------------
+            # initialization
+            theta_desired = math.radians(20)
+            phi_desired = math.radians(28)
 
             rospy.loginfo("Initial rocking step to the right")
             rospy.sleep(1)
@@ -186,23 +182,26 @@ class manipulation_control_law:
             self.compute_control_vector_field(theta_desired, phi_desired)
 
             start_pt = np.zeros((2,1))
-            start_pt[0,0] = math.radians(self._euler.y) #tilt angle
+            start_pt[0,0] = math.radians(self._equilibrium_euler.y)#math.radians(self._euler.y) #tilt angle
             start_pt[1,0] = 0.0 #alpha; start from zero
 
             self.flow_of_vector_field(start_pt)
             self.compute_apex_position_sequence(dir_rock)
 
             [dir_rock, rock_number] = self.relocate_arm_waypoints(dir_rock, rock_number)
-            #
-            # dir_rock = -1*dir_rock
-            # rock_number += 1
+
 
             return dir_rock, rock_number
 
+        theta_desired = math.radians(20)
+        phi_desired = math.radians(15)
 
+        if self._twist.twist.angular.z < -1 and self._euler.z > 8  and dir_rock == -1:
+        # if self._twist.twist.angular.z < -2  and dir_rock == -1:
+
+        # if self._euler.z > 2 and self._euler.z < 10 and self._twist.twist.angular.z < -5 and self._euler.y > 10 and dir_rock == -1:
         # if self._euler.z < 10 and self._twist.twist.angular.z < -3 and self._euler.y > 10 and dir_rock == -1:
-
-        if self._euler.y > 10 and dir_rock == -1:
+        # if self._euler.y > 10 and dir_rock == -1:
 
             rospy.loginfo("Right Action")
 
@@ -211,7 +210,7 @@ class manipulation_control_law:
 
 
             start_pt = np.zeros((2,1))
-            start_pt[0,0] = math.radians(self._euler.y) #tilt angle
+            start_pt[0,0] = math.radians(self._equilibrium_euler.y)#math.radians(self._euler.y) #tilt angle
             start_pt[1,0] = 0.0 #alpha; start from zero
 
             self.flow_of_vector_field(start_pt)
@@ -219,17 +218,14 @@ class manipulation_control_law:
 
             [dir_rock, rock_number] = self.relocate_arm_waypoints(dir_rock, rock_number)
 
-            # dir_rock = -1*dir_rock
-            # rock_number += 1
 
-            # plt.plot(self._stream_theta0.T, self._stream_alpha.T)
-            # plt.hold
+        elif self._twist.twist.angular.z > 1 and self._euler.z  < -8 and dir_rock == 1:
+        # elif self._twist.twist.angular.z > 2 and dir_rock == 1:
 
 
-
+        # elif self._euler.z < -2 and self._euler.z > -10 and self._twist.twist.angular.z > 5 and self._euler.y > 10 and dir_rock == 1:
         # elif self._euler.z > -10 and self._twist.twist.angular.z > 3 and self._euler.y > 10 and dir_rock == 1:
-
-        elif self._euler.y > 10 and dir_rock == 1:
+        # elif self._euler.y > 10 and dir_rock == 1:
 
 
             rospy.loginfo("Left Action")
@@ -238,19 +234,13 @@ class manipulation_control_law:
 
 
             start_pt = np.zeros((2,1))
-            start_pt[0,0] = math.radians(self._euler.y) #tilt angle
+            start_pt[0,0] = math.radians(self._equilibrium_euler.y) #math.radians(self._euler.y) #tilt angle
             start_pt[1,0] = 0.0 #alpha; start from zero
 
             self.flow_of_vector_field(start_pt)
             self.compute_apex_position_sequence(dir_rock)
 
             [dir_rock, rock_number] = self.relocate_arm_waypoints(dir_rock, rock_number)
-
-            # dir_rock = -1*dir_rock
-            # rock_number += 1
-
-            # plt.plot(self._stream_theta0.T, self._stream_alpha.T)
-            # plt.hold
 
         return dir_rock, rock_number
 
@@ -266,6 +256,7 @@ class manipulation_control_law:
             wpose.orientation = copy.deepcopy(current_pose.orientation)
             wpose.position.x = current_pose.position.x + col[0]
             wpose.position.y = current_pose.position.y + col[1]
+            # wpose.position.z = current_pose.position.z + col[2]
             wpose.position.z = self._kong_arm_init_pose.position.z + col[2]
 
             # self._axis3d.scatter(wpose.position.x,wpose.position.y,wpose.position.z)
@@ -280,7 +271,7 @@ class manipulation_control_law:
 
             rospy.loginfo("Following Target Waypoints")
             self._group.execute(plan, wait=True)
-            rospy.sleep(0.10)
+            rospy.sleep(0.5)
 
             dir_rock = -1*dir_rock
             rock_number += 1
@@ -372,7 +363,7 @@ class manipulation_control_law:
             current_stream_pt = next_stream_pt;
             current_direction = next_direction;
 
-            if np.linalg.norm(current_direction) < 0.3:
+            if np.linalg.norm(current_direction) < 0.10:
                 break
 
         self._stream_theta0 = stream_x[0, 0:stp];
@@ -443,8 +434,8 @@ class manipulation_control_law:
         for theta0, alpha in zip(self._stream_theta0, self._stream_alpha):
 
 
-            current_rot_psi = tfms.rotation_matrix(math.radians(self._euler.x), [0,0,1])
-            # current_rot_psi = tfms.rotation_matrix(math.radians(-90), [0,0,1])
+            # current_rot_psi = tfms.rotation_matrix(math.radians(self._euler.x), [0,0,1])
+            current_rot_psi = tfms.rotation_matrix(math.radians(self._equilibrium_euler.x), [0,0,1])
 
             init_rot = tfms.rotation_matrix(math.pi/2, [0,0,1])
             rot_StoQ = np.matmul(np.matmul(np.matmul(current_rot_psi,init_rot),tfms.rotation_matrix(theta0, [0,1,0])),tfms.rotation_matrix(dir_rock*alpha, [1,0,0]))
@@ -524,22 +515,11 @@ if __name__ == '__main__':
 
         while not rospy.is_shutdown():
 
-            # manipulator_control.compute_potential_energy()
-            # [x_displacement, y_displacement] = manipulator_control.compute_distance_traversed(initial_contact_position)
-            #
-            # if y_displacement > 0.02:
-            #     "Rock left to maintain heading"
-            #     dir_rock = 1
-            #
-            # elif y_displacement < -0.02:
-            #     "Rock right to maintain heading"
-            #     dir_rock = -1
-
             if rock_number<= total_rocking_steps:
 
                 [dir_rock, rock_number] = manipulator_control.rock_walk(dir_rock, rock_number)
 
-                print(rock_number)
+                # print(rock_number)
 
 
             rate.sleep()

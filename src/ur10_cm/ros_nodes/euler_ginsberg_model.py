@@ -23,6 +23,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from scipy import integrate
 
+import matlab.engine
 
 
 
@@ -31,20 +32,40 @@ class EulerTransform:
 
         rospy.sleep(3)
 
-
-
-        self.set_object_parameters(object_id=1)
+        self.set_object_parameters(object_id=0)
         self.initialize_past_velocity_containers()
 
         self.initialize_publishers()
         self.initialize_subscribers()
 
 
+    #     #----------------------------------------------------------------------
+    #     self._engine = matlab.engine.start_matlab()
+    #
+    #     [self._ke_fun, self.pe_fun] = compute_ke_pe_fun(self._object_radius,
+    #                                                     self._object_masscenter_lateraloffset,
+    #                                                     self._object_masscenter_height,
+    #                                                     self._object_mass)
+    #
+    #
+    # def compute_ke_pe(self):
+
+
+
 
     def set_object_parameters(self, object_id):
 
         if object_id == 0:
+            """Old Metal Cone"""
+            self._object_mass = 1
+
             self._object_radius = 0.35
+
+            self._object_apex_lateral_offset = 0.35
+            self._object_apex_vertical_offset = 1.30
+
+            self._object_masscenter_lateraloffset = 0.15
+            self._object_masscenter_height = 0.30
 
         elif object_id == 1:
             self._object_radius = 0.1420
@@ -153,6 +174,9 @@ class EulerTransform:
         self._ginsberg_euler_pub.publish(self._ginsberg_euler)
 
         self._ginsberg_quaternion = tfms.quaternion_from_matrix(rot)
+
+
+
 
 
         #########################TWIST TRANSFORM###########################
