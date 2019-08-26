@@ -1,6 +1,6 @@
 # rockwalk
 
-![](rockwalk_gif.gif)
+![](media/rockwalk_gif.gif)
 
 ## Contact kinematics
 
