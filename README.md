@@ -1,6 +1,6 @@
-# Rock and Walk Manipulation with UR-10 Robot Arm
+# rockwalk
 
-
+![](rockwalk_gif.gif)
 
 ## Contact kinematics
 
