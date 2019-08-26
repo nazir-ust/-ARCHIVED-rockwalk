@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
     [fig_contact_plot, axis_contact_plot, background_contact_plot, points_contact_plot] = rw_plot.setup_contact_position_plot()
 
-    # [figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi] = rw_plot.setup_euler_plot()
+    [figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi] = rw_plot.setup_euler_plot()
 
     [fig_phase_plot, axis_phase_plot, background_phase_plot, points_phase_plot] = rw_plot.setup_phase_plot()
 
@@ -222,7 +222,7 @@ if __name__ == '__main__':
 
         rw_plot.contact_position_plot(fig_contact_plot, axis_contact_plot, background_contact_plot, points_contact_plot)
 
-        # rw_plot.euler_plot(figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi)
+        rw_plot.euler_plot(figure_euler_plot, axis_euler_plot, background_euler_plot, points_euler_plot_theta, points_euler_plot_phi)
 
         rw_plot.phase_plot(fig_phase_plot, axis_phase_plot, background_phase_plot, points_phase_plot)
 

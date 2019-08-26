@@ -39,6 +39,10 @@ class manipulation_control_law:
         self._group = moveit_commander.MoveGroupCommander(group)
 
 
+        self._group.set_max_velocity_scaling_factor(1)
+        self._group.set_max_acceleration_scaling_factor(1)
+
+
         self.initialize_publishers()
         self.initialize_tf_broadcasters_listeners()
 
@@ -54,9 +58,9 @@ class manipulation_control_law:
 
         self._kong_arm_init_pose = Pose()
 
-        self._kong_arm_init_pose.position.x =  -1.45#-1.65
+        self._kong_arm_init_pose.position.x =  -1.65#-1.65
         self._kong_arm_init_pose.position.y = -0.53#-0.47
-        self._kong_arm_init_pose.position.z = 0.49#0.49
+        self._kong_arm_init_pose.position.z = 0.55#0.49
 
         self._kong_arm_init_pose.orientation.x = -0.0260040764497
         self._kong_arm_init_pose.orientation.y = -0.701264425535
@@ -70,11 +74,6 @@ class manipulation_control_law:
     def get_current_pose(self):
         return self._group.get_current_pose()
 
-    def set_vel_scaling (self, factor):
-        self._group.set_max_velocity_scaling_factor(factor)
-
-    def set_accel_scaling (self, factor):
-        self._group.set_max_acceleration_scaling_factor(factor)
 
     def follow_target_joint(self, joint_target):
         rospy.loginfo("Following Joint Target")
@@ -329,8 +328,7 @@ if __name__ == '__main__':
 
     manipulator_control.subscribe_object_twist()
     manipulator_control.subscribe_body_euler()
-    manipulator_control.set_accel_scaling(1)
-    manipulator_control.set_vel_scaling(1)
+
 
     rospy.sleep(1)
 
@@ -355,7 +353,7 @@ if __name__ == '__main__':
         rock_sign = -1; #-1 for left rock. 1 for right rock. To make sure only alternate rocks
         count_right_rock = 0
         count_left_rock = 0
-        rocking_steps = 20
+        rocking_steps = 15
         while not rospy.is_shutdown():
 
 

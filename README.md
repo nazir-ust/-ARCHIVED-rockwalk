@@ -1,6 +1,9 @@
 # Rock and Walk Manipulation with UR-10 Robot Arm
 
 
+
+## Contact kinematics
+
 ##  Usage
 This repository is a workspace that contains `MoveIt!`, `ur_modern_driver` and some other packages to perform rock-and-walk manipulation ([manuscript](http://junseo.people.ust.hk/papers/rnw.pdf), [video](https://drive.google.com/file/d/1CDzb0HQTZxM8v69VRgbU-VmYGj-cTmHZ/view?usp=sharing)) with a UR-10 robot arm. The setup here is general to facilitate dual arm control of UR-10s in our laboratory setting. If you would like to use the two UR-10 arms for some other manipulation task, then you can setup your workspace as prescribed below and scroll down to Robot Control section to begin controlling one or two UR-10 arms. We assume **Ubuntu 16.04** with **ROS Kinetic** installed.
 
